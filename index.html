@@ -1,185 +1,173 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Repetidora PP5TKR — Corupá (SC)</title>
-  <style>
-    :root{
-      --bg:#ffffff;
-      --text:#333333;
-      --accent:#7ec8ff;
-      --max-width:900px;
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
-    }
-    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-    .wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;padding:24px}
-    .container{width:100%;max-width:var(--max-width);padding:18px;box-sizing:border-box}
-    header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
-    .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text)}
-    .logo{width:48px;height:48px;border-radius:8px;background:linear-gradient(135deg,var(--accent),#5fb0ff);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
-    h1,h2,h3{color:var(--accent);margin:0 0 8px 0}
-    p,li{margin:0 0 12px 0;line-height:1.5}
-    .card{background:rgba(0,0,0,0.02);padding:14px;border-radius:10px}
-    form input, form textarea {width:100%;padding:10px;border-radius:6px;border:1px solid rgba(0,0,0,0.12);box-sizing:border-box}
-    button{background:var(--accent);color:white;padding:10px 14px;border:none;border-radius:8px;cursor:pointer}
-    .muted{color:rgba(51,51,51,0.75)}
-    .log-entries{max-height:260px;overflow:auto;padding:8px;border-radius:8px;background:white;border:1px solid rgba(0,0,0,0.04)}
-    .entry{padding:8px;border-bottom:1px solid rgba(0,0,0,0.04)}
-    .entry:last-child{border-bottom:none}
-    footer{margin-top:18px;font-size:0.9rem;color:rgba(51,51,51,0.8)}
-    @media(min-width:720px){ .columns{display:grid;grid-template-columns:1fr 320px;gap:16px} }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estação Repetidora PP5TKR</title>
+    <style>
+        body {
+            background-color: #e0f7e0; /* Verde bem claro */
+            color: #00ccff; /* Cinza escuro para o texto geral */
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            text-align: left; /* Alinhamento à esquerda */
+            max-width: 800px;
+            padding: 20px;
+            margin: 0 auto;
+        }
+        p {
+            color: #444444; /* Azul celeste para parágrafos */
+        }
+        .image-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        button {
+            background-color: #444444;
+            color: #e0f7e0;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #333333;
+        }
+    </style>
+    <!-- Biblioteca corrigida e atualizada para salvar arquivos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script>
+        // Array para armazenar os registros
+        let registros = JSON.parse(localStorage.getItem('pp5tkrLogs')) || [];
+        // Atualiza o contador de visitas
+        let visitas = localStorage.getItem('pp5tkrVisitas') || 1;
+        visitas = parseInt(visitas);
+        // Função para exibir os registros
+        function exibirRegistros() {
+            const divRegistros = document.getElementById('registros');
+            if (registros.length === 0) {
+                divRegistros.innerHTML = '<p>Nenhum registro.</p>';
+            } else {
+                let html = '<ul>';
+                registros.forEach(reg => {
+                    html += `<li><strong>${reg.indicativo}</strong> - ${reg.observacao} (${reg.data})</li>`;
+                });
+                html += '</ul>';
+                divRegistros.innerHTML = html;
+            }
+            // Atualiza o contador de visitas
+            document.getElementById('contador').textContent = visitas;
+            // Salva o contador atualizado
+            localStorage.setItem('pp5tkrVisitas', visitas);
+        }
+        // Função para registrar uma visita
+        function registrarVisita() {
+            const indicativo = document.getElementById('indicativo').value.trim();
+            const observacao = document.getElementById('observacao').value.trim();
+            if (indicativo === '') {
+                alert('Por favor, insira um indicativo.');
+                return;
+            }
+            const novoRegistro = {
+                indicativo: indicativo,
+                observacao: observacao || 'Sem observação',
+                data: new Date().toLocaleString('pt-BR')
+            };
+            registros.unshift(novoRegistro); // Adiciona no início
+            localStorage.setItem('pp5tkrLogs', JSON.stringify(registros));
+            exibirRegistros();
+            // Incrementa o contador de visitas
+            visitas++;
+            localStorage.setItem('pp5tkrVisitas', visitas);
+            // Limpa o formulário
+            document.getElementById('indicativo').value = '';
+            document.getElementById('observacao').value = '';
+        }
+        // Função para limpar os registros locais
+        function limparRegistros() {
+            if (confirm('Tem certeza que deseja limpar todos os registros?')) {
+                registros = [];
+                localStorage.removeItem('pp5tkrLogs');
+                exibirRegistros();
+            }
+        }
+        // Função para salvar todos os registros em um arquivo .txt
+        function salvarLog() {
+            if (registros.length === 0) {
+                alert('Não há registros para salvar.');
+                return;
+            }
+            let texto = 'LOG VIA PP5TKR 29.680 FM - CORUPÁ, SC\n';
+            texto += '========================================\n\n';
+            registros.forEach(reg => {
+                texto += `Indicativo/Nome: ${reg.indicativo}\n`;
+                texto += `Observação: ${reg.observacao}\n`;
+                texto += `Data/Hora: ${reg.data}\n`;
+                texto += '---\n';
+            });
+            texto += `\nTotal de registros: ${registros.length}\n`;
+            texto += `\n© 2026 PP5TKR — Corupá (SC)`;
+            const blob = new Blob([texto], {type: 'text/plain;charset=utf-8'});
+            saveAs(blob, 'log_pp5tkr.txt');
+        }
+        // Carrega os registros ao carregar a página
+        window.onload = exibirRegistros;
+    </script>
 </head>
 <body>
-  <div class="wrap">
-    <div class="container" role="main">
-      <header>
-        <a class="brand" href="#" aria-label="Início">
-          <div class="logo">P</div>
-          <div>
-            <div style="font-weight:700">PP5TKR</div>
-            <div class="muted" style="font-size:0.9rem">Repetidora — Corupá, SC</div>
-          </div>
-        </a>
-        <div class="muted" id="visit-count">Visitas: 0</div>
-      </header>
-
-      <main>
-        <section class="card" aria-labelledby="titulo">
-          <h1 id="titulo">Estação Repetidora PP5TKR</h1>
-          <p>PP5TKR é uma estação repetidora de radioamador localizada em Corupá, Santa Catarina, Brasil. Fruto do trabalho dos colegas PP5TK e PU5GEK com apoio de toda comunidade de radioamadores locais.</p>
-
-          <h2 id="funcao">O que faz a repetidora PP5TKR?</h2>
-          <p>A repetidora recebe sinais de rádio na frequência de 29.680mhz e retransmite em 29.580mhz para ampliar alcance. Isso facilita contatos locais e dx quando os sinais diretos não são suficientes para transpor barreiras.</p>
-
-          <h2 id="informacoes">Informações principais</h2>
-          <ul>
-            <li><strong>Prefixo:</strong> PP5TKR</li>
-            <li><strong>Local:</strong> Corupá — Santa Catarina, Brasil</li>
-            <li><strong>Frequência:</strong> 29.680-tx 29.580-rx</li>
-            <li><strong>Potência:</strong> 25W pep.</li>
-          </ul>
-        </section>
-
-        <div class="columns" style="margin-top:14px">
-          <section class="card" aria-labelledby="registrar">
-            <h2 id="registrar">Deixe seu registro (log)</h2>
-            <p class="muted">Registre o indicativo e uma observação curta. Cada registro aparecerá abaixo e fica salvo no seu navegador.</p>
-
-            <form id="log-form">
-              <label class="muted" for="nome">Indicativo / nome </label><br/>
-              <input id="nome" name="nome" type="text" placeholder="Ex: PU5ABC / José " required style="margin-top:6px;margin-bottom:10px" />
-
-              <label class="muted" for="obs">Observação (opcional)</label><br/>
-              <textarea id="obs" name="obs" rows="3" placeholder="Ex: Contato via PP5TKR sinal 5/9" style="margin-top:6px;margin-bottom:10px"></textarea>
-
-              <button type="submit">Registrar visita</button>
-            </form>
-
-            <h3 style="margin-top:12px">Registros recentes</h3>
-            <div class="log-entries" id="log-list" aria-live="polite" aria-label="Registros">
-              <!-- Entradas serão inseridas aqui -->
-            </div>
-
-            <div style="margin-top:8px">
-              <button id="clear-log" style="background:#f2f2f2;color:var(--text)">Limpar registros locais</button>
-            </div>
-          </section>
-
-          <aside class="card" aria-labelledby="como-usar">
-            <h3 id="como-usar">Como usar a repetidora</h3>
-            <p>1) Sintonize a frequência de entrada/saída correta. 2) Ouça antes de transmitir. 3) Identifique-se com seu indicativo. 4) Siga as leis e normas do seu país.</p>
-
-            <h3 style="margin-top:12px">Dicas</h3>
-            <ul>
-              <li>Mantenha transmissões curtas e claras.</li>
-              <li>Evite ruído e interferência.</li>
-              <li>De prioridade a estações dx.</li>
-            </ul>
-          </aside>
+    <div class="container">
+        <div class="image-container">
+            <img src="pp5tkr.jpeg" alt="Logo da Estação Repetidora PP5TKR">
         </div>
-
-        <section class="card" style="margin-top:14px" aria-labelledby="sobre">
-          <h2 id="sobre">Sobre esta página</h2>
-          <p>Esta página é informativa e permite registrar visitas localmente no navegador. O registro (log) e o contador de visitas são mantidos somente no dispositivo onde a página é aberta.</p>
-        </section>
-      </main>
-
-      <footer>
-        <div class="muted">© <span id="year"></span> PP5TKR — Corupá (SC)</div>
-      </footer>
+        <h1>PP5TKR — Corupá, SC</h1>
+        <p>Visitas: <span id="contador">1</span></p>
+        <h2>Estação Repetidora PP5TKR</h2>
+        <p>PP5TKR é uma estação repetidora de radioamador localizada em Corupá, Santa Catarina, Brasil. Fruto do trabalho dos colegas PP5TK e PU5GEK com apoio de toda comunidade de radioamadores locais.</p>
+        <h3>O que faz a repetidora PP5TKR?</h3>
+        <p>A repetidora recebe sinais de rádio na frequência de 29.680mhz e retransmite em 29.580mhz para ampliar alcance. Isso facilita contatos locais e dx quando os sinais diretos não são suficientes para transpor barreiras.</p>
+        <h3>Informações principais</h3>
+        <p><strong>Prefixo:</strong> PP5TKR<br>
+        <strong>Local:</strong> Corupá — Santa Catarina, Brasil<br>
+        <strong>Frequência:</strong> 29.680-tx 29.580-rx<br>
+        <strong>Potência:</strong> 25W pep.</p>
+        <h3>Deixe seu registro (log)</h3>
+        <p>Registre o indicativo e localização ou uma observação curta. Cada registro aparecerá abaixo e fica salvo no seu navegador.</p>
+        <form onsubmit="event.preventDefault(); registrarVisita();">
+            <p>
+                <label for="indicativo">Indicativo / nome</label><br>
+                <input type="text" id="indicativo" name="indicativo" placeholder="Ex: PU5ABC / José" required><br>
+                <label for="observacao">Localização (Sinal)</label><br>
+                <input type="text" id="observacao" name="observacao" placeholder="Ex: Corupá SC, sinal 5/9"><br>
+                <button type="submit">Registrar visita</button>
+            </p>
+        </form>
+        <h3>Registros recentes</h3>
+        <div id="registros">
+            <p>Nenhum registro.</p>
+        </div>
+        <p>
+            <!-- Botão corrigido com o type completo -->
+            <button type="button" onclick="salvarLog()">Salvar log em arquivo .txt</button>
+            <button type="button" onclick="limparRegistros()">Limpar registros locais</button>
+        </p>
+        <h3>Como usar a repetidora</h3>
+        <p>1) Sintonize a frequência de entrada/saída correta. 2) Ouça antes de transmitir. 3) Identifique-se com seu indicativo. 4) Siga as leis e normas do seu país.</p>
+        <h3>Dicas</h3>
+        <p>Mantenha transmissões curtas e claras.<br>
+        Evite ruído e interferência.<br>
+        De prioridade a estações dx.</p>
+        <h3>Sobre esta página</h3>
+        <p>Esta página permite registrar os logs localmente no navegador. Significa que o (log) é mantido somente no dispositivo onde a página é aberta, podendo ser salvo no dispositivo.</p>
+        <p>© 2026 PP5TKR — Corupá (SC)</p>
     </div>
-  </div>
-
-  <script>
-    // Atualiza ano
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    // Chaves de localStorage
-    const VISIT_KEY = 'pp5tkr_visit_count_v1';
-    const LOG_KEY = 'pp5tkr_log_entries_v1';
-
-    function getVisitCount(){ return parseInt(localStorage.getItem(VISIT_KEY) || '0', 10); }
-    function setVisitCount(n){ localStorage.setItem(VISIT_KEY, String(n)); document.getElementById('visit-count').textContent = 'Visitas: ' + n; }
-
-    // Incrementa ao carregar
-    const newCount = getVisitCount() + 1;
-    setVisitCount(newCount);
-
-    // Log: carregar e renderizar
-    function loadLogs(){
-      try{
-        const raw = localStorage.getItem(LOG_KEY);
-        const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-      }catch(e){ return []; }
-    }
-
-    function saveLogs(arr){ localStorage.setItem(LOG_KEY, JSON.stringify(arr)); }
-
-    function renderLogs(){
-      const list = document.getElementById('log-list');
-      list.innerHTML = '';
-      const logs = loadLogs();
-      if(logs.length === 0){
-        list.innerHTML = '<div class="muted" style="padding:8px">Nenhum registro.</div>';
-        return;
-      }
-      logs.slice().reverse().forEach(entry => {
-        const div = document.createElement('div');
-        div.className = 'entry';
-        const time = new Date(entry.ts).toLocaleString();
-        div.innerHTML = '<strong>' + escapeHtml(entry.name) + '</strong> <span class="muted" style="font-size:0.9rem"> - ' + time + '</span><div style="margin-top:6px">' + escapeHtml(entry.note) + '</div>';
-        list.appendChild(div);
-      });
-    }
-
-    function escapeHtml(s){
-      if(!s) return '';
-      return String(s).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
-    }
-
-    document.getElementById('log-form').addEventListener('submit', function(e){
-      e.preventDefault();
-      const name = document.getElementById('nome').value.trim();
-      const note = document.getElementById('obs').value.trim();
-      if(!name) return alert('Por favor informe seu nome ou indicativo.');
-      const logs = loadLogs();
-      logs.push({ name: name, note: note, ts: new Date().toISOString() });
-      saveLogs(logs);
-      renderLogs();
-      document.getElementById('log-form').reset();
-    });
-
-    document.getElementById('clear-log').addEventListener('click', function(){
-      if(!confirm('Limpar todos os registros locais?')) return;
-      localStorage.removeItem(LOG_KEY);
-      renderLogs();
-    });
-
-    // Inicializa
-    renderLogs();
-  </script>
 </body>
 </html>
